@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import { setAccurateInterval } from "../lib/set-accurate-interval";
+import PlayIcon from "../assets/play.svg";
+import RestartIcon from "../assets/restart.svg";
+import StopIcon from "../assets/stop.svg";
 
 const DEFAULT_TIME = 30 * 60;
 
@@ -31,33 +34,29 @@ const Page = () => {
   }, [isRunning]);
 
   return (
-    <div>
-      <h1>Timer</h1>
-      <div>
-        <span>{formatTime(time)}</span>
-        <div>
-          <button
-            onClick={() => {
-              setIsRunning(true);
-            }}
-          >
-            Start
-          </button>
-          <button
-            onClick={() => {
-              setIsRunning(false);
-            }}
-          >
-            Stop
-          </button>
-          <button
-            onClick={() => {
-              setTime(DEFAULT_TIME);
-            }}
-          >
-            Reset
-          </button>
-        </div>
+    <div className="p-1">
+      <div className="text-6xl font-mono font-bold text-center">
+        {formatTime(time)}
+      </div>
+      <div className="flex justify-around mt-4">
+        <StopIcon
+          className="w-10 h-10 hover:stroke-gray-500"
+          onClick={() => {
+            setIsRunning(false);
+          }}
+        />
+        <PlayIcon
+          className="w-10 h-10 hover:stroke-gray-500"
+          onClick={() => {
+            setIsRunning(true);
+          }}
+        />
+        <RestartIcon
+          className="w-10 h-10 hover:stroke-gray-500"
+          onClick={() => {
+            setTime(DEFAULT_TIME);
+          }}
+        />
       </div>
     </div>
   );

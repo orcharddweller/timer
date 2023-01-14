@@ -60,10 +60,10 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
+        "height": 140,
         "resizable": true,
         "title": "timer",
-        "width": 800
+        "width": 200 
       }
     ]
   }

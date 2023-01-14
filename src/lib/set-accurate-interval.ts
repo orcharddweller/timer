@@ -22,11 +22,13 @@ export const setAccurateInterval = (
 
     correction = (1 - AVG_RATIO) * (stepSize - dt) + AVG_RATIO * correction;
 
+    console.log(drift, correction);
+
     fn(dt);
 
     timer = setTimeout(
       _setAccurateInterval,
-      (stepSize + correction + drift) * 1000,
+      (stepSize + drift) * 1000,
       fn,
       stepSize,
       now
