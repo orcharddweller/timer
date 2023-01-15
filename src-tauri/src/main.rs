@@ -9,7 +9,6 @@ use tauri::State;
 
 struct MainSpeaker(Mutex<Sink>);
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 async fn play_sound(main_speaker: State<'_, MainSpeaker>) -> Result<(), ()> {
     let file = Cursor::new(include_bytes!("../assets/audio/alarm.mp3"));
@@ -38,6 +37,7 @@ fn main() {
     tauri::Builder::default()
         .manage(MainSpeaker(Mutex::new(sink)))
         .invoke_handler(tauri::generate_handler![play_sound, stop_sound])
+        .plugin(tauri_plugin_store::Builder::default().build())
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

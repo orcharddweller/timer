@@ -1,5 +1,3 @@
-const AVG_RATIO = 0.9;
-
 export const setAccurateInterval = (
   fn: (dt: number) => void,
   stepSize: number
@@ -20,13 +18,11 @@ export const setAccurateInterval = (
 
     drift += stepSize - dt;
 
-    correction = (1 - AVG_RATIO) * (stepSize - dt) + AVG_RATIO * correction;
-
     fn(dt);
 
     timer = setTimeout(
       _setAccurateInterval,
-      (stepSize + correction + drift) * 1000,
+      (stepSize + drift) * 1000,
       fn,
       stepSize,
       now

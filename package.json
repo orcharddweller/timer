@@ -11,7 +11,8 @@
     "@tauri-apps/api": "^1.2.0",
     "next": "^13.0.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "tauri-plugin-store-api": "https://github.com/tauri-apps/tauri-plugin-store"
   },
   "devDependencies": {
     "@svgr/webpack": "^6.5.1",
