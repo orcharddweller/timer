@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { setAccurateInterval } from "./set-accurate-interval";
 import PlayIcon from "../assets/icons/play.svg";
 import RestartIcon from "../assets/icons/restart.svg";
@@ -8,6 +8,7 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { TimerState } from "./types";
 import { useStore } from "./use-store";
 import Link from "next/link";
+import { ClockContext } from "./clock-context";
 
 const formatTime = (time: number) => {
   time = Math.round(time);
@@ -37,7 +38,7 @@ const validateTime = (time: string) => {
 };
 
 const Timer = () => {
-  const [time, setTime] = useState<number | null>(null);
+  const [time, setTime] = useContext(ClockContext);
   const [inputTime, setInputTime] = useState<string | null>(null);
   const [state, setState] = useState<TimerState>("stopped");
 
