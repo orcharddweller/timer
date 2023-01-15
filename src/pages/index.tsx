@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { setAccurateInterval } from "../lib/set-accurate-interval";
-import PlayIcon from "../assets/play.svg";
-import RestartIcon from "../assets/restart.svg";
-import StopIcon from "../assets/stop.svg";
+import PlayIcon from "../assets/icons/play.svg";
+import RestartIcon from "../assets/icons/restart.svg";
+import StopIcon from "../assets/icons/stop.svg";
+import { invoke } from "@tauri-apps/api/tauri";
+import { TimerState } from "../lib/types";
 
 const DEFAULT_TIME = 30 * 60;
 
@@ -18,13 +20,13 @@ const formatTime = (time: number) => {
 };
 
 const parseTime = (time: string): number | null => {
-  const [minutes, seconds] = time.split(":").map((x) => parseInt(x, 10));
+  const [minutes, seconds] = time.split(":");
 
-  if (isNaN(minutes) || isNaN(seconds)) {
+  if (!minutes.match(/^\d+$/) || !seconds.match(/^[0-5]\d$/)) {
     return null;
   }
 
-  return minutes * 60 + seconds;
+  return parseInt(minutes) * 60 + parseInt(seconds);
 };
 
 const validateTime = (time: string) => {
@@ -34,10 +36,10 @@ const validateTime = (time: string) => {
 };
 
 const Page = () => {
-  const [time, setTime] = useState<number | null>(null);
-  const [inputTime, _setInputTime] = useState(":");
+  const [time, setTime] = useState<number | null>(DEFAULT_TIME);
+  const [inputTime, _setInputTime] = useState(formatTime(DEFAULT_TIME));
   const [isInputWrong, setIsInputWrong] = useState(false);
-  const [isRunning, setIsRunning] = useState(false);
+  const [state, setState] = useState<TimerState>("stopped");
 
   const setInputTime = useCallback((value: string) => {
     _setInputTime(value);
@@ -56,7 +58,17 @@ const Page = () => {
   }, []);
 
   useEffect(() => {
-    if (!isRunning) {
+    if (time === null || time > 0 || state !== "running") {
+      return;
+    }
+
+    setTime(0);
+    setState("alarmed");
+    invoke("play_sound");
+  }, [time, state]);
+
+  useEffect(() => {
+    if (state !== "running") {
       return;
     }
 
@@ -65,88 +77,105 @@ const Page = () => {
     }, 0.01);
 
     return clear;
-  }, [isRunning]);
+  }, [state]);
 
   return (
-    <div className="p-1">
-      <div className="text-6xl font-mono font-bold">
-        <input
-          readOnly={isRunning}
-          className={`block mx-auto w-52 text-center ${
-            isRunning ? "select-none" : ""
-          }`}
-          value={isRunning ? formatTime(time) : inputTime}
-          onKeyDown={(e) => {
-            if (e.key === "Backspace") {
-              // get colon position
-              const colonPos = e.currentTarget.value.indexOf(":");
+    <div
+      className={`p-1 select-none ${
+        state === "alarmed" ? "animate-ping bg-green-500" : ""
+      }`}
+      onClick={() => {
+        if (state === "alarmed") {
+          setState("stopped");
+          invoke("stop_sound");
+        }
+      }}
+    >
+      <div className={state === "alarmed" ? "pointer-events-none" : ""}>
+        <div className="text-6xl font-mono font-bold">
+          <input
+            readOnly={state !== "stopped"}
+            className={`block mx-auto w-52 text-center ${
+              state === "running" ? "select-none" : ""
+            }`}
+            value={state === "running" ? formatTime(time) : inputTime}
+            onKeyDown={(e) => {
+              if (e.key === "Backspace") {
+                // get colon position
+                const colonPos = e.currentTarget.value.indexOf(":");
 
-              if (e.currentTarget.selectionStart === colonPos + 1) {
-                e.currentTarget.setSelectionRange(colonPos, colonPos);
+                if (e.currentTarget.selectionStart === colonPos + 1) {
+                  e.currentTarget.setSelectionRange(colonPos, colonPos);
+                }
               }
-            }
-          }}
-          onChange={(e) => {
-            const newValue = e.target.value;
+            }}
+            onChange={(e) => {
+              const newValue = e.target.value;
 
-            if (newValue.length === 0) {
-              setInputTime(":");
-              return;
-            }
-
-            if (!validateTime(newValue)) {
-              return;
-            }
-            setInputTime(newValue);
-
-            if (newValue.length === 3) {
-              if (
-                e.currentTarget.selectionStart === 2 &&
-                e.currentTarget.selectionEnd === 2
-              ) {
-                e.currentTarget.setSelectionRange(3, 3);
+              if (newValue.length === 0) {
+                setInputTime(":");
+                return;
               }
-            }
-          }}
-        />
-      </div>
-      <div className="flex justify-around mt-4">
-        <StopIcon
-          className={`w-10 h-10 
-          ${isInputWrong ? "stroke-red-500" : "hover:stroke-gray-500"}`}
-          onClick={() => {
-            setIsRunning(false);
 
-            if (time === null) {
-              return;
-            }
+              if (newValue.match(/^\d$/)) {
+                setInputTime(`${newValue}:`);
+                return;
+              }
 
-            _setInputTime(formatTime(time));
-          }}
-        />
-        <PlayIcon
-          className={`w-10 h-10 
+              if (!validateTime(newValue)) {
+                return;
+              }
+              setInputTime(newValue);
+
+              if (newValue.length === 3) {
+                if (
+                  e.currentTarget.selectionStart === 2 &&
+                  e.currentTarget.selectionEnd === 2
+                ) {
+                  e.currentTarget.setSelectionRange(3, 3);
+                }
+              }
+            }}
+          />
+        </div>
+        <div className="flex justify-around mt-4">
+          <StopIcon
+            className={`w-10 h-10 
           ${isInputWrong ? "stroke-red-500" : "hover:stroke-gray-500"}`}
-          disabled={isInputWrong}
-          onClick={() => {
-            if (isInputWrong) {
-              return;
-            }
-            setIsRunning(true);
-          }}
-        />
-        <RestartIcon
-          className={`w-10 h-10  ${
-            isInputWrong ? "stroke-red-500" : "hover:stroke-gray-500"
-          }`}
-          disabled={isInputWrong}
-          onClick={() => {
-            if (isInputWrong) {
-              return;
-            }
-            setTime(DEFAULT_TIME);
-          }}
-        />
+            onClick={() => {
+              setState("stopped");
+
+              if (time === null) {
+                return;
+              }
+
+              _setInputTime(formatTime(time));
+            }}
+          />
+          <PlayIcon
+            className={`w-10 h-10 
+          ${isInputWrong ? "stroke-red-500" : "hover:stroke-gray-500"}`}
+            disabled={isInputWrong}
+            onClick={() => {
+              if (isInputWrong) {
+                return;
+              }
+              setState("running");
+            }}
+          />
+          <RestartIcon
+            className={`w-10 h-10  ${
+              isInputWrong ? "stroke-red-500" : "hover:stroke-gray-500"
+            }`}
+            disabled={isInputWrong}
+            onClick={() => {
+              if (isInputWrong) {
+                return;
+              }
+              setTime(DEFAULT_TIME);
+            }}
+          />
+        </div>
       </div>
     </div>
   );

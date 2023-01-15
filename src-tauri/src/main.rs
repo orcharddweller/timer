@@ -3,15 +3,41 @@
     windows_subsystem = "windows"
 )]
 
+use rodio::{Decoder, OutputStream, Sink, Source};
+use std::{io::Cursor, sync::Mutex};
+use tauri::State;
+
+struct MainSpeaker(Mutex<Sink>);
+
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+async fn play_sound(main_speaker: State<'_, MainSpeaker>) -> Result<(), ()> {
+    let file = Cursor::new(include_bytes!("../assets/audio/alarm.mp3"));
+
+    let source = Decoder::new(file).unwrap();
+
+    main_speaker
+        .0
+        .lock()
+        .unwrap()
+        .append(source.repeat_infinite());
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn stop_sound(main_speaker: State<'_, MainSpeaker>) -> Result<(), ()> {
+    main_speaker.0.lock().unwrap().stop();
+    Ok(())
 }
 
 fn main() {
+    let (_stream, stream_handle) = OutputStream::try_default().unwrap();
+    let sink = Sink::try_new(&stream_handle).unwrap();
+
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet])
+        .manage(MainSpeaker(Mutex::new(sink)))
+        .invoke_handler(tauri::generate_handler![play_sound, stop_sound])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
