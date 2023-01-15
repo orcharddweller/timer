@@ -19,8 +19,40 @@ export const useStore = () => {
     await store?.set("initial-time", time);
   };
 
+  const getVolume = async () => {
+    const storedVolume = await store?.get<number>("volume");
+
+    if (storedVolume === null) {
+      return 100;
+    }
+
+    return storedVolume;
+  };
+
+  const setVolume = async (volume: number) => {
+    await store?.set("volume", volume);
+  };
+
+  const setTheme = async (theme: string) => {
+    await store?.set("theme", theme);
+  };
+
+  const getTheme = async () => {
+    const storedTheme = await store?.get<string>("theme");
+
+    if (storedTheme === null) {
+      return "";
+    }
+
+    return storedTheme;
+  };
+
   return {
     getInitialTime,
     setInitialTime,
+    getVolume,
+    setVolume,
+    setTheme,
+    getTheme,
   };
 };
