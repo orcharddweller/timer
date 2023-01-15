@@ -8,7 +8,7 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { TimerState } from "./types";
 import { useStore } from "./use-store";
 import Link from "next/link";
-import { ClockContext } from "./clock-context";
+import Settings from "./settings";
 
 const formatTime = (time: number) => {
   time = Math.round(time);
@@ -38,9 +38,10 @@ const validateTime = (time: string) => {
 };
 
 const Timer = () => {
-  const [time, setTime] = useContext(ClockContext);
+  const [time, setTime] = useState<number | null>(null);
   const [inputTime, setInputTime] = useState<string | null>(null);
   const [state, setState] = useState<TimerState>("stopped");
+  const [inSettings, setInSettings] = useState(false);
 
   const { getInitialTime, setInitialTime } = useStore();
 
@@ -92,6 +93,10 @@ const Timer = () => {
     return clear;
   }, [state]);
 
+  if (inSettings && state !== "alarmed") {
+    return <Settings onBack={() => setInSettings(false)} />;
+  }
+
   return (
     <div className="overflow-clip h-screen">
       <div
@@ -106,13 +111,12 @@ const Timer = () => {
         }}
       >
         <div className={state === "alarmed" ? "pointer-events-none" : ""}>
-          <Link href="/settings">
-            <SettingsIcon
-              className={`w-6 h-6 absolute right-1 ${
-                state === "alarmed" ? "invisible" : ""
-              }`}
-            />
-          </Link>
+          <SettingsIcon
+            onClick={() => setInSettings(true)}
+            className={`w-6 h-6 absolute right-1 ${
+              state === "alarmed" ? "invisible" : ""
+            }`}
+          />
           <div className="text-6xl font-mono font-bold p-1">
             <input
               readOnly={state !== "stopped"}

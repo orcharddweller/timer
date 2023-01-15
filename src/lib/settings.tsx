@@ -5,7 +5,11 @@ import { useStore } from "./use-store";
 import SettingsIcon from "../assets/icons/settings-filled.svg";
 import { THEMES } from "./constants";
 
-const Settings = () => {
+export interface SettingsProps {
+  onBack: () => void;
+}
+
+const Settings = (props: SettingsProps) => {
   const [volumeInput, setVolumeInput] = useState<number | null>(null);
   const [themeInput, setThemeInput] = useState<string | null>(null);
   const { getVolume, setVolume, getTheme, setTheme } = useStore();
@@ -32,9 +36,10 @@ const Settings = () => {
 
   return (
     <div>
-      <Link href="/">
-        <SettingsIcon className={"w-6 h-6 absolute right-1"} />
-      </Link>
+      <SettingsIcon
+        onClick={props.onBack}
+        className={"w-6 h-6 absolute right-1"}
+      />
       <div className="p-2">
         <h1 className="text-center text-3xl font-bold font-mono">Settings</h1>
 
