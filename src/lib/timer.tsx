@@ -1,5 +1,4 @@
 import { useCallback, useContext, useEffect, useState } from "react";
-import { setAccurateInterval } from "./set-accurate-interval";
 import PlayIcon from "../assets/icons/play.svg";
 import RestartIcon from "../assets/icons/restart.svg";
 import StopIcon from "../assets/icons/stop.svg";
@@ -7,8 +6,8 @@ import SettingsIcon from "../assets/icons/settings.svg";
 import { invoke } from "@tauri-apps/api/tauri";
 import { TimerState } from "./types";
 import { useStore } from "./use-store";
-import Link from "next/link";
 import Settings from "./settings";
+import { setSkippingInterval } from "./set-interval/setSkippingInterval";
 
 const formatTime = (time: number) => {
   time = Math.round(time);
@@ -86,9 +85,9 @@ const Timer = () => {
       return;
     }
 
-    const clear = setAccurateInterval((dt) => {
-      setTime((time) => time - dt);
-    }, 0.01);
+    const clear = setSkippingInterval((dt) => {
+      setTime((t) => t - dt / 1000);
+    }, 1000);
 
     return clear;
   }, [state]);
