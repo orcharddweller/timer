@@ -5,18 +5,18 @@ export const setSkippingInterval: CustomDtSetInterval = (
   stepSize,
   ...args
 ) => {
-  let lastTime = Date.now() + stepSize;
+  let nextTime = Date.now() + stepSize;
 
   let timeout: NodeJS.Timeout;
 
   const _helper = () => {
     const now = Date.now();
 
-    const nSteps = Math.floor((now - lastTime) / stepSize) + 1;
+    const nSteps = Math.floor((now - nextTime) / stepSize) + 1;
 
-    const ms = nSteps * stepSize - (now - lastTime);
+    nextTime = nextTime + nSteps * stepSize;
 
-    lastTime = now + ms;
+    let ms = nextTime - now;
 
     timeout = setTimeout(_helper, ms);
 
