@@ -1,11 +1,11 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import PlayIcon from "../assets/icons/play.svg";
 import RestartIcon from "../assets/icons/restart.svg";
 import StopIcon from "../assets/icons/stop.svg";
 import SettingsIcon from "../assets/icons/settings.svg";
 import { invoke } from "@tauri-apps/api/tauri";
 import { TimerState } from "./types";
-import { useStore } from "./use-store";
+import { useSettings } from "./use-settings";
 import Settings from "./settings";
 import { setSkippingInterval } from "./set-interval/setSkippingInterval";
 
@@ -42,7 +42,7 @@ const Timer = () => {
   const [state, setState] = useState<TimerState>("stopped");
   const [inSettings, setInSettings] = useState(false);
 
-  const { getInitialTime, setInitialTime } = useStore();
+  const { getInitialTime, setInitialTime } = useSettings();
 
   useEffect(() => {
     const init = async () => {

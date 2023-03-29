@@ -1,7 +1,5 @@
-import { invoke } from "@tauri-apps/api";
-import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useStore } from "./use-store";
+import { useSettings } from "./use-settings";
 import SettingsIcon from "../assets/icons/settings-filled.svg";
 import { THEMES } from "./constants";
 
@@ -12,7 +10,7 @@ export interface SettingsProps {
 const Settings = (props: SettingsProps) => {
   const [volumeInput, setVolumeInput] = useState<number | null>(null);
   const [themeInput, setThemeInput] = useState<string | null>(null);
-  const { getVolume, setVolume, getTheme, setTheme } = useStore();
+  const { getVolume, setVolume, getTheme, setTheme } = useSettings();
 
   useEffect(() => {
     const init = async () => {
@@ -54,7 +52,6 @@ const Settings = (props: SettingsProps) => {
             onChange={(e) => {
               setVolumeInput(e.target.valueAsNumber);
               setVolume(e.target.valueAsNumber);
-              invoke("set_volume", { volume: e.target.valueAsNumber / 100 });
             }}
           />
         </div>
@@ -67,7 +64,6 @@ const Settings = (props: SettingsProps) => {
 
             setThemeInput(theme);
             setTheme(theme);
-            document.querySelector("html").setAttribute("data-theme", theme);
           }}
         >
           {THEMES.map((theme) => (
