@@ -121,31 +121,40 @@ const Timer = () => {
         />
       </div>
       <div className="flex justify-around mt-4">
-        <StopIcon
-          className={`w-10 h-10 
-          ${time === null ? "stroke-error" : "hover:stroke-primary"}`}
+        <button
           onClick={() => {
             setState("stopped");
           }}
-        />
-        <PlayIcon
-          className={`w-10 h-10 
+        >
+          <StopIcon
+            className={`w-10 h-10 
           ${time === null ? "stroke-error" : "hover:stroke-primary"}`}
+          />
+        </button>
+        <button
           onClick={() => {
             if (time === null || time <= 0) {
               return;
             }
             setState("running");
           }}
-        />
-        <RestartIcon
-          className={`w-10 h-10  ${
-            time === null ? "stroke-error" : "hover:stroke-primary"
-          }`}
+        >
+          <PlayIcon
+            className={`w-10 h-10 
+          ${time === null ? "stroke-error" : "hover:stroke-primary"}`}
+          />
+        </button>
+        <button
           onClick={async () => {
             reset();
           }}
-        />
+        >
+          <RestartIcon
+            className={`w-10 h-10  ${
+              time === null ? "stroke-error" : "hover:stroke-primary"
+            }`}
+          />
+        </button>
       </div>
     </div>
   );
