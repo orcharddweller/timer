@@ -2,12 +2,9 @@ import SettingsIcon from "../assets/icons/settings-filled.svg";
 import { THEMES } from "./constants";
 import { useStore } from "./store";
 import { shallow } from "zustand/shallow";
+import Link from "next/link";
 
-export interface SettingsProps {
-  onBack: () => void;
-}
-
-const Settings = (props: SettingsProps) => {
+const Settings = () => {
   const { volume, theme, setVolume, setTheme } = useStore(
     (state) => ({
       volume: state.volume,
@@ -20,10 +17,9 @@ const Settings = (props: SettingsProps) => {
 
   return (
     <div>
-      <SettingsIcon
-        onClick={props.onBack}
-        className={"w-6 h-6 absolute right-1"}
-      />
+      <Link href="/">
+        <SettingsIcon className={"w-6 h-6 absolute right-1"} />
+      </Link>
       <div className="p-2">
         <h1 className="text-center text-3xl font-bold font-mono">Settings</h1>
 
