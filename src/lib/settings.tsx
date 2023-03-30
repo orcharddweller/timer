@@ -1,36 +1,22 @@
-import { useEffect, useState } from "react";
-import { useSettings } from "./use-settings";
 import SettingsIcon from "../assets/icons/settings-filled.svg";
 import { THEMES } from "./constants";
+import { useStore } from "./store";
+import { shallow } from "zustand/shallow";
 
 export interface SettingsProps {
   onBack: () => void;
 }
 
 const Settings = (props: SettingsProps) => {
-  const [volumeInput, setVolumeInput] = useState<number | null>(null);
-  const [themeInput, setThemeInput] = useState<string | null>(null);
-  const { getVolume, setVolume, getTheme, setTheme } = useSettings();
-
-  useEffect(() => {
-    const init = async () => {
-      setVolumeInput(await getVolume());
-    };
-
-    init();
-  }, []);
-
-  useEffect(() => {
-    const init = async () => {
-      setThemeInput(await getTheme());
-    };
-
-    init();
-  }, []);
-
-  if (volumeInput === null) {
-    return null;
-  }
+  const { volume, theme, setVolume, setTheme } = useStore(
+    (state) => ({
+      volume: state.volume,
+      theme: state.theme,
+      setVolume: state.setVolume,
+      setTheme: state.setTheme,
+    }),
+    shallow
+  );
 
   return (
     <div>
@@ -47,10 +33,9 @@ const Settings = (props: SettingsProps) => {
             type="range"
             min="0"
             max="100"
-            value={volumeInput}
+            value={volume}
             className="range range-xs"
             onChange={(e) => {
-              setVolumeInput(e.target.valueAsNumber);
               setVolume(e.target.valueAsNumber);
             }}
           />
@@ -58,12 +43,9 @@ const Settings = (props: SettingsProps) => {
         <select
           data-choose-theme
           className="select select-sm select-ghost w-full max-w-xs"
-          value={themeInput}
+          value={theme}
           onChange={(e) => {
-            const theme = e.target.value;
-
-            setThemeInput(theme);
-            setTheme(theme);
+            setTheme(e.target.value);
           }}
         >
           {THEMES.map((theme) => (
