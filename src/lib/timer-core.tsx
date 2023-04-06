@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api";
 import { useEffect } from "react";
-import shallow from "zustand/shallow";
+import { shallow } from "zustand/shallow";
 import { setSkippingInterval } from "./set-interval/setSkippingInterval";
 import { useStore } from "./store";
 

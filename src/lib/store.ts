@@ -3,8 +3,9 @@ import { Store } from "tauri-plugin-store-api";
 import { create } from "zustand";
 import { DEFAULT_TIME } from "./constants";
 import { TimerState } from "./types";
+import { z } from "zod";
 
-const store = new Store(".settings.dat");
+const tauriStore = new Store(".settings.dat");
 
 export interface TimerStore {
   time: number;
@@ -18,6 +19,7 @@ export interface TimerStore {
   setInitialTime: (time: number) => Promise<void>;
   setVolume: (volume: number) => Promise<void>;
   setTheme: (theme: string) => Promise<void>;
+  _hydrated: boolean;
 }
 
 export const useStore = create<TimerStore>()((set) => ({
@@ -38,8 +40,8 @@ export const useStore = create<TimerStore>()((set) => ({
   setInitialTime: async (time) => {
     set({ initialTime: time });
     set({ time });
-    await store.set("initial-time", time);
-    store.save();
+    await tauriStore.set("initial-time", time);
+    tauriStore.save();
   },
   setVolume: async (volume) => {
     set({ volume: volume });
@@ -48,24 +50,41 @@ export const useStore = create<TimerStore>()((set) => ({
   setTheme: async (theme) => {
     set({ theme: theme });
 
-    document.querySelector("html").setAttribute("data-theme", theme);
-    await store.set("theme", theme);
+    document.querySelector("html")?.setAttribute("data-theme", theme);
+    await tauriStore.set("theme", theme);
 
-    store.save();
+    tauriStore.save();
   },
+  _hydrated: false,
 }));
 
-store.get<number>("initial-time").then((time) => {
-  useStore.setState({ initialTime: time });
-  useStore.setState({ time });
-});
+const hydrate = async () => {
+  const time = await tauriStore.get("initial-time");
+  const volume = await tauriStore.get("volume");
+  const theme = await tauriStore.get("theme");
 
-store.get<number>("volume").then((volume) => {
-  useStore.setState({ volume: volume });
-});
+  const parsedTime = z.number().safeParse(time);
+  const parsedVolume = z.number().safeParse(volume);
+  const parsedTheme = z.string().safeParse(theme);
 
-store.get<string>("theme").then((theme) => {
-  useStore.setState({ theme: theme });
+  if (parsedTime.success) {
+    useStore.setState({ initialTime: parsedTime.data });
+    useStore.setState({ time: parsedTime.data });
+  }
 
-  document.querySelector("html").setAttribute("data-theme", theme);
-});
+  if (parsedVolume.success) {
+    useStore.setState({ volume: parsedVolume.data });
+  }
+
+  if (parsedTheme.success) {
+    useStore.setState({ theme: parsedTheme.data });
+
+    document
+      .querySelector("html")
+      ?.setAttribute("data-theme", parsedTheme.data);
+  }
+
+  useStore.setState({ _hydrated: true });
+};
+
+hydrate();

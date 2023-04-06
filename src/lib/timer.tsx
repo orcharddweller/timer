@@ -54,6 +54,10 @@ const Timer = () => {
 
     const parsedTime = parseTime(value);
 
+    if (parsedTime === null) {
+      return;
+    }
+
     setInitialTime(parsedTime);
   }, []);
 
@@ -80,7 +84,7 @@ const Timer = () => {
           className={`block mx-auto w-52 text-center bg-inherit ${
             state === "running" ? "select-none" : ""
           }`}
-          value={state === "running" ? formatTime(time) : inputTime}
+          value={state === "running" ? formatTime(time) : inputTime ?? ""}
           onKeyDown={(e) => {
             if (e.key === "Backspace") {
               // get colon position
